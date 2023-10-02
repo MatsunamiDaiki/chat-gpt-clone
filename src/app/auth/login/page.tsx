@@ -1,47 +1,55 @@
 "use client";
 
-import React from 'react'
-import Link from 'next/link'
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../../../firebase';
-import { useRouter } from 'next/navigation';
+import { auth } from "../../../../firebase";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type Inputs = {
   email: string;
   password: string;
-}
+};
 
-const Register = () => {
-
+const Login = () => {
   const router = useRouter();
 
-  const { 
-    register, 
+  const {
+    register,
     handleSubmit,
-    formState: {errors}
+    formState: { errors },
   } = useForm<Inputs>();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    await createUserWithEmailAndPassword(auth, data.email, data.password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        router.push("/auth/login")
+    await signInWithEmailAndPassword(auth, data.email, data.password)
+      .then((userCrendential) => {
+        router.push("/");
       })
       .catch((error) => {
-        alert(error)
+        if (error.code === "auth/user-not-found") {
+          alert("そのようなユーザーは存在しません。");
+        } else {
+          alert(error.message);
+        }
       });
+  };
 
-  }
   return (
     <div className="h-screen flex flex-col items-center justify-center">
-      <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h1 className="mb-4 text-2xl text-gray-700 font-medium">新規登録</h1>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white p-8 rounded-lg shadow-md w-96"
+      >
+        <h1 className="mb-4 text-2xl text-gray-700 font-medium">ログイン</h1>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-600">
             Email
           </label>
-          <input 
+          <input
             {...register("email", {
               required: "メールアドレスは必須です。",
               pattern: {
@@ -50,7 +58,7 @@ const Register = () => {
                 message: "不適切なメールアドレスです。",
               },
             })}
-            type="text" 
+            type="text"
             className="mt-1 border-2 rounded-md w-full p-2"
           />
           {errors.email && (
@@ -62,6 +70,7 @@ const Register = () => {
             Password
           </label>
           <input
+            type="password"
             {...register("password", {
               required: "パスワードは必須です。",
               minLength: {
@@ -69,7 +78,6 @@ const Register = () => {
                 message: "6文字以上入力してください。",
               },
             })}
-            type="password" 
             className="mt-1 border-2 rounded-md w-full p-2"
           />
           {errors.password && (
@@ -78,28 +86,29 @@ const Register = () => {
             </span>
           )}
         </div>
+
         <div className="flex justify-end">
           <button
             type="submit"
             className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
           >
-            新規登録
+            ログイン
           </button>
         </div>
         <div className="mt-4">
           <span className="text-gray-600 text-sm">
-            既にアカウントをお持ちですか？
+            初めてのご利用の方はこちら
           </span>
           <Link
-            href={"/auth/login"}
+            href={"/auth/register"}
             className="text-blue-500 text-sm font-bold ml-1 hover:text-blue-700"
           >
-            ログインページへ
+            新規登録ページへ
           </Link>
         </div>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Login;
