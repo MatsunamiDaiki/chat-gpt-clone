@@ -1,3 +1,4 @@
+import { AppProvider } from '@/context/AppContext'
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -16,7 +17,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="jp">
-      <body> {children}</body>
+      <body> 
+        <AppProvider> {children}</AppProvider>
+      </body>
     </html>
   )
 }
